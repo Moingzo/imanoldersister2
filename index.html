@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>언니체험</title>
+    <style type="text/css">
+        body { margin: 0; overflow: hidden; }
+
+        #cursor {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #rotate {
+            animation: rotate 4s infinite linear, grow 10s infinite alternate;
+            width: 40px;
+            height: auto; 
+        }
+        @keyframes rotate {
+            to { transform: rotate(360deg); }   
+        }
+        @keyframes grow {
+            0% { transform: scale(1.5); } 
+            100% { transform: scale(10.0); }
+        }
+        @font-face {
+            font-family: 'YoonChildfundkoreaManSeh';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/YoonChildfundkoreaManSeh.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'UhBeeSeulvely';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeSeulvely.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        #main-image {
+            width: 900px;
+            height: auto; 
+            position: absolute;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 1s, transform 1s; 
+            transform: translate(-50%, -50%) rotate(0deg); 
+            cursor: pointer; 
+            top: 50%; 
+            left: 50%; 
+        }
+
+        .message {
+            color: black;
+            font-family: "YoonChildfundkoreaManSeh";
+            opacity: 0;
+            transition: opacity 1s;
+            position: absolute;
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid black;
+        }
+
+        section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <audio id="bgm" src="sulrae.mp3" autoplay></audio>
+    <section>
+        <img id="main-image" src="firsttitle.png" alt="Main Title" />
+    </section>
+
+    <div id="cursor">
+        <img id="rotate" src="sis.gif" alt="cursor" />
+    </div>
+    <script type="text/javascript">
+        const messages = [
+            "언니 같이 가 ~",
+            "언니 나도 언니 친구들이랑 놀아도 돼~?",
+            "언니 나도 머리 언니처럼 해줘~ ~",
+            "언니 나 이 가방 빌려도 돼 ~?",
+            "언니 나 배고파 ㅠㅠ",
+            "언니 이거 해줘~",
+            "언니 언니 옷 입어도 돼??"
+        ];
+
+        function isOverlapping(x, y, width, height, existingMessages) {
+            for (const msg of existingMessages) {
+                const rect = msg.getBoundingClientRect();
+                if (
+                    x < rect.right &&
+                    x + width > rect.left &&
+                    y < rect.bottom &&
+                    y + height > rect.top
+                ) {
+                    return true; // 겹침
+                }
+            }
+            return false; // 겹치지 않음
+        }
+
+        function createRandomMessage(existingMessages) {
+            const message = document.createElement('div');
+            message.className = 'message';
+            message.textContent = messages[Math.floor(Math.random() * messages.length)];
+            message.style.fontSize = "20px";
+
+            let x, y;
+            const width = 300;
+            const height = 50;
+            let attempts = 0;
+
+            do {
+                x = Math.random() * (window.innerWidth - width);
+                y = Math.random() * (window.innerHeight - height);
+                attempts++;
+            } while (isOverlapping(x, y, width, height, existingMessages) && attempts < 100);
+
+            message.style.left = x + "px";
+            message.style.top = y + "px";
+            document.body.appendChild(message);
+
+            existingMessages.push(message); // 추가한 메시지를 배열에 저장
+            return message;
+        }
+
+        const existingMessages = [];
+
+        // 배경에 무작위 메시지 복제
+        setInterval(() => {
+            createRandomMessage(existingMessages);
+        }, 50);
+        
+        window.onmousemove = function(e) {
+            setTimeout(() => {
+                const cursor = document.getElementById('cursor');
+                cursor.style.left = e.clientX + "px";
+                cursor.style.top = e.clientY + "px";
+            }, 250);
+
+            // 각 메시지에 대한 위치와 마우스 거리 계산
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(message => {
+                const rect = message.getBoundingClientRect();
+                const messageCenterX = rect.left + rect.width / 2;
+                const messageCenterY = rect.top + rect.height / 2;
+                const distance = Math.sqrt(Math.pow(e.clientX - messageCenterX, 2) + Math.pow(e.clientY - messageCenterY, 2));
+
+                if (distance < 50) { // 100px 이내에 있으면 나타나게
+                    message.style.opacity = 1;
+                }
+            });
+        };
+        
+        // 마지막으로 main-image 나타나게 하기
+        setTimeout(() => {
+            const mainImage = document.getElementById('main-image');
+            mainImage.style.display = "block"; // 이미지 보이게 하기
+            mainImage.style.opacity = 1; 
+            mainImage.style.transform = "translate(-50%, -50%) rotate(360deg)"; 
+
+            
+            mainImage.onclick = function() {
+                mainImage.src = "secondtitle.png"; // 이미지 소스 변경
+            };
+        }, 10000);
+    </script>
+</body>
+</html>
